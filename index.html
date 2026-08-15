@@ -10,12 +10,12 @@
   <style>
     @media print {
       .no-print { display: none !important; }
-      body { background: white; padding: 0; }
-      @page { size: A4 portrait; margin: 10mm; }
+      body { background: white; padding: 0; margin: 0; }
+      @page { size: A4 portrait; margin: 8mm; }
     }
   </style>
 </head>
-<body class="bg-gray-100 p-4 print:p-0 print:bg-white text-gray-800 text-sm">
+<body class="bg-gray-100 p-4 print:p-0 print:bg-white text-gray-800 text-xs leading-relaxed">
 
   <!-- FORM DASHBOARD -->
   <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md mb-8 no-print border relative z-10" id="form-container">
@@ -102,15 +102,14 @@
     </div>
   </div>
 
-  <!-- HASIL CETAK SURAT JALAN (2 SALINAN) -->
-  <div class="max-w-[210mm] mx-auto bg-white p-2 space-y-4">
+  <!-- HASIL CETAK SURAT JALAN (2 SALINAN PRESISI A4) -->
+  <div class="max-w-[195mm] mx-auto bg-white space-y-4">
     <div id="surat-copy-1"></div>
-    <div class="border-b-2 border-dashed border-gray-400 my-2 no-print"></div>
+    <div class="border-b border-dashed border-gray-300 my-2 no-print"></div>
     <div id="surat-copy-2"></div>
   </div>
 
   <script>
-    // Inisialisasi Supabase Client (Diperbaiki agar tidak terdeklarasi ganda)
     const SUPABASE_URL = "https://gdultxxabcjtnaxprvat.supabase.co";
     const SUPABASE_KEY = "sb_publishable_LGTFrw06VV9He2Wddj9OaA_LxpTBsic";
     let supabaseClient = null;
@@ -222,45 +221,73 @@
       const alamat = document.getElementById('input-alamat').value;
 
       let rows = items.map((it, i) => `
-        <tr class="border-b border-gray-300">
-          <td class="border border-gray-400 p-1 text-center">${i + 1}</td>
-          <td class="border border-gray-400 p-1">${it.nama}</td>
-          <td class="border border-gray-400 p-1">${it.qty}</td>
-          <td class="border border-gray-400 p-1">${it.ket}</td>
+        <tr class="border-b border-gray-400 text-xs">
+          <td class="border border-gray-400 px-2 py-1 text-center font-medium">${i + 1}</td>
+          <td class="border border-gray-400 px-2 py-1 font-medium">${it.nama}</td>
+          <td class="border border-gray-400 px-2 py-1 font-medium text-center">${it.qty}</td>
+          <td class="border border-gray-400 px-2 py-1 font-medium">${it.ket}</td>
         </tr>
       `).join('');
 
       return `
-        <div class="border border-gray-400 p-4 font-sans text-xs relative">
-          <div class="h-2 bg-emerald-600 w-full mb-3"></div>
-          <div class="text-center font-bold text-base uppercase tracking-wider mb-4 border-b pb-1">Surat Jalan</div>
-          <div class="grid grid-cols-2 gap-x-4 gap-y-1 mb-4">
-            <div>
-              <div class="flex"><span class="w-16 font-semibold">Kepada</span>: ${kepada}</div>
-              <div class="flex"><span class="w-16 font-semibold">Alamat</span>: ${alamat}</div>
-              <div class="flex"><span class="w-16 font-semibold">Gedung</span>: ${gedung}</div>
+        <div class="border border-gray-500 p-4 font-sans relative text-xs bg-white">
+          
+          <!-- KOP HEADER DENGAN AKSEN PANAH HIJAU & JUDUL -->
+          <div class="flex justify-between items-center mb-3 border-b pb-2">
+            <!-- SVG Aksen Panah Hijau Presisi -->
+            <div class="flex items-center">
+              <svg width="200" height="20" viewBox="0 0 200 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 0H160L180 10L160 20H0V0Z" fill="#006400"/>
+                <path d="M160 0L180 10L160 20L172 10L160 0Z" fill="#00FF00"/>
+              </svg>
             </div>
+            <!-- Judul Surat Jalan -->
             <div>
-              <div class="flex"><span class="w-20 font-semibold">Tanggal</span>: ${tanggal}</div>
-              <div class="flex"><span class="w-20 font-semibold">No. Surat</span>: ${noSurat}</div>
-              <div class="flex"><span class="w-20 font-semibold">No. Polisi</span>: ${noPolisi}</div>
+              <h2 class="text-base font-bold tracking-wider uppercase text-gray-900 pr-2">SURAT JALAN</h2>
             </div>
           </div>
-          <table class="w-full border-collapse border border-gray-400 mb-6 text-left">
+
+          <!-- META INFORMASI (Dua Kolom Rapi) -->
+          <div class="grid grid-cols-12 gap-2 mb-3">
+            <div class="col-span-7 space-y-0.5">
+              <div class="flex"><span class="w-16 font-bold">Kepada</span><span class="mr-1">:</span><span class="flex-1">${kepada}</span></div>
+              <div class="flex"><span class="w-16 font-bold">Alamat</span><span class="mr-1">:</span><span class="flex-1">${alamat}</span></div>
+              <div class="flex"><span class="w-16 font-bold">Gedung</span><span class="mr-1">:</span><span class="flex-1">${gedung}</span></div>
+            </div>
+            <div class="col-span-5 space-y-0.5 pl-2">
+              <div class="flex"><span class="w-20 font-bold">Tanggal</span><span class="mr-1">:</span><span>${tanggal}</span></div>
+              <div class="flex"><span class="w-20 font-bold">No. Surat</span><span class="mr-1">:</span><span>${noSurat}</span></div>
+              <div class="flex"><span class="w-20 font-bold">No. Polisi</span><span class="mr-1">:</span><span>${noPolisi}</span></div>
+            </div>
+          </div>
+
+          <!-- TABEL BARANG -->
+          <table class="w-full border-collapse border border-gray-400 mb-4 text-left">
             <thead>
-              <tr class="bg-gray-100 border-b border-gray-400">
-                <th class="border border-gray-400 p-1 w-8 text-center">No</th>
-                <th class="border border-gray-400 p-1">Nama Barang</th>
-                <th class="border border-gray-400 p-1 w-24">Qty</th>
-                <th class="border border-gray-400 p-1">Keterangan</th>
+              <tr class="bg-gray-100 border-b border-gray-400 text-xs">
+                <th class="border border-gray-400 px-2 py-1 w-8 text-center font-bold">No</th>
+                <th class="border border-gray-400 px-2 py-1 font-bold">Nama Barang</th>
+                <th class="border border-gray-400 px-2 py-1 w-20 text-center font-bold">Qty</th>
+                <th class="border border-gray-400 px-2 py-1 w-44 font-bold">Keterangan</th>
               </tr>
             </thead>
-            <tbody>${rows}</tbody>
+            <tbody>
+              ${rows}
+            </tbody>
           </table>
+
+          <!-- TANDA TANGAN PENGIRIM & PENERIMA -->
           <div class="flex justify-between text-center mt-6 px-12">
-            <div><div>Pengirim</div><div class="mt-10">(..............................)</div></div>
-            <div><div>Penerima</div><div class="mt-10">(..............................)</div></div>
+            <div>
+              <div class="font-medium">Pengirim</div>
+              <div class="mt-10 text-gray-700">(…...............................)</div>
+            </div>
+            <div>
+              <div class="font-medium">Penerima</div>
+              <div class="mt-10 text-gray-700">(…...............................)</div>
+            </div>
           </div>
+
         </div>
       `;
     }
@@ -300,7 +327,6 @@
       window.print();
     }
 
-    // Jalankan inisialisasi awal
     generateAutoNoSurat();
     onPenerimaChange();
     renderItemsInput();
