@@ -17,7 +17,7 @@
 </head>
 <body class="bg-gray-100 p-4 print:p-0 print:bg-white text-gray-800 text-sm">
 
-  <!-- FORM DASHBOARD (Dipastikan di layer paling atas 'relative z-10') -->
+  <!-- FORM DASHBOARD -->
   <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md mb-8 no-print border relative z-10" id="form-container">
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-2xl font-bold text-emerald-700">Generator Surat Jalan</h1>
@@ -110,15 +110,14 @@
   </div>
 
   <script>
+    // Inisialisasi Supabase Client (Diperbaiki agar tidak terdeklarasi ganda)
     const SUPABASE_URL = "https://gdultxxabcjtnaxprvat.supabase.co";
     const SUPABASE_KEY = "sb_publishable_LGTFrw06VV9He2Wddj9OaA_LxpTBsic";
-    let supabase = null;
-    
-    try {
-      if (window.supabase) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      }
-    } catch(e) { console.error(e); }
+    let supabaseClient = null;
+
+    if (window.supabase) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
 
     let items = [
       { nama: 'Tanaman Planter Box', qty: '126 Pot', ket: 'Tanaman Indoor' },
@@ -276,8 +275,8 @@
       const statusEl = document.getElementById('save-status');
       statusEl.innerText = "Menyimpan ke DB...";
       try {
-        if (supabase) {
-          await supabase.from('surat_jalan').insert([{
+        if (supabaseClient) {
+          await supabaseClient.from('surat_jalan').insert([{
             no_surat: document.getElementById('input-nosurat').value,
             kepada: document.getElementById('input-kepada').value,
             data: {
@@ -301,7 +300,7 @@
       window.print();
     }
 
-    // Inisialisasi awal
+    // Jalankan inisialisasi awal
     generateAutoNoSurat();
     onPenerimaChange();
     renderItemsInput();
