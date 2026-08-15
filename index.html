@@ -17,8 +17,8 @@
 </head>
 <body class="bg-gray-100 p-4 print:p-0 print:bg-white text-gray-800 text-sm">
 
-  <!-- FORM DASHBOARD -->
-  <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md mb-8 no-print border" id="form-container">
+  <!-- FORM DASHBOARD (Dipastikan di layer paling atas 'relative z-10') -->
+  <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md mb-8 no-print border relative z-10" id="form-container">
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-2xl font-bold text-emerald-700">Generator Surat Jalan</h1>
       <span id="save-status" class="text-xs font-semibold text-blue-600"></span>
@@ -28,7 +28,7 @@
       <!-- Dropdown Penerima -->
       <div class="col-span-1 md:col-span-2 bg-emerald-50 p-3 rounded-lg border border-emerald-200">
         <label class="block text-xs font-bold text-emerald-800 mb-1">Pilih Penerima / Tujuan</label>
-        <select id="select-penerima" onchange="onPenerimaChange()" class="w-full border p-2 rounded text-sm bg-white font-medium">
+        <select id="select-penerima" onchange="onPenerimaChange()" class="w-full border p-2 rounded text-sm bg-white font-medium cursor-pointer">
           <option value="PT. Beiersdorf Indonesia">PT. Beiersdorf Indonesia</option>
           <option value="Universitas Terbuka">Universitas Terbuka</option>
           <option value="CUSTOM">-- + Tambah / Isi Manual Lainnya --</option>
@@ -38,7 +38,7 @@
       <!-- Dropdown Gedung UT -->
       <div id="wrapper-gedung-ut" class="hidden col-span-1 md:col-span-2 bg-blue-50 p-3 rounded-lg border border-blue-200">
         <label class="block text-xs font-bold text-blue-800 mb-1">Pilih Gedung Universitas Terbuka</label>
-        <select id="select-gedung-ut" onchange="onGedungUTChange()" class="w-full border p-2 rounded text-sm bg-white font-medium">
+        <select id="select-gedung-ut" onchange="onGedungUTChange()" class="w-full border p-2 rounded text-sm bg-white font-medium cursor-pointer">
           <option value="Perbankan">Gedung Perbankan</option>
           <option value="Poliklinik">Gedung Poliklinik</option>
           <option value="LPPMP Lobby">Gedung LPPMP Lobby</option>
@@ -62,7 +62,7 @@
         <label class="block text-xs font-semibold mb-1">No. Surat (Auto)</label>
         <div class="flex gap-2">
           <input type="text" id="input-nosurat" oninput="renderSurat()" class="w-full border p-2 rounded text-sm">
-          <button onclick="generateAutoNoSurat()" class="bg-gray-200 text-xs px-2 py-1 rounded hover:bg-gray-300">🔄 Auto</button>
+          <button type="button" onclick="generateAutoNoSurat()" class="bg-gray-200 text-xs px-2 py-1 rounded hover:bg-gray-300">🔄 Auto</button>
         </div>
       </div>
 
@@ -78,7 +78,7 @@
 
       <div>
         <label class="block text-xs font-semibold mb-1">No. Polisi Armada</label>
-        <select id="input-nopol" onchange="renderSurat()" class="w-full border p-2 rounded text-sm bg-white">
+        <select id="input-nopol" onchange="renderSurat()" class="w-full border p-2 rounded text-sm bg-white cursor-pointer">
           <option value="F 8575 HY">F 8575 HY</option>
           <option value="B 9123 SJA">B 9123 SJA</option>
           <option value="B 9456 KLB">B 9456 KLB</option>
@@ -93,10 +93,10 @@
 
     <h2 class="font-semibold text-md mb-2">Daftar Barang</h2>
     <div id="items-container"></div>
-    <button onclick="addItem()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs mt-2">+ Tambah Barang</button>
+    <button type="button" onclick="addItem()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs mt-2 cursor-pointer">+ Tambah Barang</button>
 
     <div class="mt-6 border-t pt-4 flex justify-end">
-      <button onclick="saveAndPrint()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded shadow">
+      <button type="button" onclick="saveAndPrint()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded shadow cursor-pointer">
         🖨️ Simpan & Cetak PDF
       </button>
     </div>
@@ -112,7 +112,13 @@
   <script>
     const SUPABASE_URL = "https://gdultxxabcjtnaxprvat.supabase.co";
     const SUPABASE_KEY = "sb_publishable_LGTFrw06VV9He2Wddj9OaA_LxpTBsic";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let supabase = null;
+    
+    try {
+      if (window.supabase) {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      }
+    } catch(e) { console.error(e); }
 
     let items = [
       { nama: 'Tanaman Planter Box', qty: '126 Pot', ket: 'Tanaman Indoor' },
@@ -174,19 +180,25 @@
       });
     }
 
+    function updateItemValue(index, field, value) {
+      items[index][field] = value;
+      renderSurat();
+    }
+
     function renderItemsInput() {
       const container = document.getElementById('items-container');
       container.innerHTML = '';
       items.forEach((item, index) => {
-        container.innerHTML += `
-          <div class="flex gap-2 mb-2 items-center">
-            <span class="w-6 text-center">${index + 1}.</span>
-            <input type="text" value="${item.nama}" oninput="items[${index}].nama = this.value; renderSurat();" placeholder="Nama Barang" class="flex-1 border p-1.5 rounded text-sm">
-            <input type="text" value="${item.qty}" oninput="items[${index}].qty = this.value; renderSurat();" placeholder="Qty" class="w-24 border p-1.5 rounded text-sm">
-            <input type="text" value="${item.ket}" oninput="items[${index}].ket = this.value; renderSurat();" placeholder="Keterangan" class="w-48 border p-1.5 rounded text-sm">
-            <button onclick="removeItem(${index})" class="bg-red-500 text-white px-2 py-1.5 rounded text-xs hover:bg-red-600">Hapus</button>
-          </div>
+        const row = document.createElement('div');
+        row.className = "flex gap-2 mb-2 items-center";
+        row.innerHTML = `
+          <span class="w-6 text-center">${index + 1}.</span>
+          <input type="text" value="${item.nama}" oninput="updateItemValue(${index}, 'nama', this.value)" placeholder="Nama Barang" class="flex-1 border p-1.5 rounded text-sm">
+          <input type="text" value="${item.qty}" oninput="updateItemValue(${index}, 'qty', this.value)" placeholder="Qty" class="w-24 border p-1.5 rounded text-sm">
+          <input type="text" value="${item.ket}" oninput="updateItemValue(${index}, 'ket', this.value)" placeholder="Keterangan" class="w-48 border p-1.5 rounded text-sm">
+          <button type="button" onclick="removeItem(${index})" class="bg-red-500 text-white px-2 py-1.5 rounded text-xs hover:bg-red-600">Hapus</button>
         `;
+        container.appendChild(row);
       });
     }
 
@@ -264,20 +276,24 @@
       const statusEl = document.getElementById('save-status');
       statusEl.innerText = "Menyimpan ke DB...";
       try {
-        await supabase.from('surat_jalan').insert([{
-          no_surat: document.getElementById('input-nosurat').value,
-          kepada: document.getElementById('input-kepada').value,
-          data: {
+        if (supabase) {
+          await supabase.from('surat_jalan').insert([{
+            no_surat: document.getElementById('input-nosurat').value,
             kepada: document.getElementById('input-kepada').value,
-            gedung: document.getElementById('input-gedung').value,
-            alamat: document.getElementById('input-alamat').value,
-            noSurat: document.getElementById('input-nosurat').value,
-            tanggal: document.getElementById('input-tanggal').value,
-            noPolisi: document.getElementById('input-nopol').value,
-            items: items
-          }
-        }]);
-        statusEl.innerText = "✅ Tersimpan!";
+            data: {
+              kepada: document.getElementById('input-kepada').value,
+              gedung: document.getElementById('input-gedung').value,
+              alamat: document.getElementById('input-alamat').value,
+              noSurat: document.getElementById('input-nosurat').value,
+              tanggal: document.getElementById('input-tanggal').value,
+              noPolisi: document.getElementById('input-nopol').value,
+              items: items
+            }
+          }]);
+          statusEl.innerText = "✅ Tersimpan!";
+        } else {
+          statusEl.innerText = "⚠️ Offline Mode";
+        }
       } catch (err) {
         statusEl.innerText = "⚠️ Simpan Gagal (Tetap Cetak)";
       }
@@ -285,6 +301,7 @@
       window.print();
     }
 
+    // Inisialisasi awal
     generateAutoNoSurat();
     onPenerimaChange();
     renderItemsInput();
