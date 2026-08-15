@@ -24,6 +24,16 @@
       <span id="save-status" class="text-xs font-semibold text-blue-600"></span>
     </div>
     
+    <!-- SECTION UPLOAD KOP SURAT -->
+    <div class="bg-amber-50 p-3 rounded-lg border border-amber-200 mb-4">
+      <label class="block text-xs font-bold text-amber-800 mb-1">🖼️ Upload Kop Surat (JPG / PNG)</label>
+      <div class="flex items-center gap-3">
+        <input type="file" id="input-kop" accept="image/jpeg, image/png, image/jpg" onchange="handleKopUpload(event)" class="text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-700 cursor-pointer">
+        <button type="button" onclick="removeKop()" id="btn-remove-kop" class="hidden text-xs text-red-600 hover:underline">Hapus Kop Gambar</button>
+      </div>
+      <p class="text-[10px] text-amber-700 mt-1">*Gambar Kop Surat akan otomatis terpasang di bagian atas Surat Jalan.</p>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
       <!-- Dropdown Penerima -->
       <div class="col-span-1 md:col-span-2 bg-emerald-50 p-3 rounded-lg border border-emerald-200">
@@ -113,6 +123,7 @@
     const SUPABASE_URL = "https://gdultxxabcjtnaxprvat.supabase.co";
     const SUPABASE_KEY = "sb_publishable_LGTFrw06VV9He2Wddj9OaA_LxpTBsic";
     let supabaseClient = null;
+    let customKopImage = null; // Menyimpan data gambar Kop Surat (Base64)
 
     if (window.supabase) {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -127,6 +138,27 @@
 
     document.getElementById('input-tanggal').value = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     
+    // Function Handler Upload Gambar Kop Surat
+    function handleKopUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          customKopImage = e.target.result;
+          document.getElementById('btn-remove-kop').classList.remove('hidden');
+          renderSurat();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removeKop() {
+      customKopImage = null;
+      document.getElementById('input-kop').value = '';
+      document.getElementById('btn-remove-kop').classList.add('hidden');
+      renderSurat();
+    }
+
     function generateAutoNoSurat() {
       const romans = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
       const today = new Date();
@@ -229,25 +261,38 @@
         </tr>
       `).join('');
 
-      return `
-        <div class="border border-gray-500 p-4 font-sans relative text-xs bg-white">
-          
-          <!-- KOP HEADER DENGAN AKSEN PANAH HIJAU & JUDUL -->
+      // Elemen Kop Surat (Dinamis: Pakai Gambar Upload atau SVG Default)
+      let headerKopHTML = '';
+      if (customKopImage) {
+        headerKopHTML = `
           <div class="flex justify-between items-center mb-3 border-b pb-2">
-            <!-- SVG Aksen Panah Hijau Presisi -->
+            <img src="${customKopImage}" class="max-h-16 max-w-[280px] object-contain" alt="Kop Surat">
+            <div>
+              <h2 class="text-base font-bold tracking-wider uppercase text-gray-900 pr-2">SURAT JALAN</h2>
+            </div>
+          </div>
+        `;
+      } else {
+        headerKopHTML = `
+          <div class="flex justify-between items-center mb-3 border-b pb-2">
             <div class="flex items-center">
               <svg width="200" height="20" viewBox="0 0 200 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M0 0H160L180 10L160 20H0V0Z" fill="#006400"/>
                 <path d="M160 0L180 10L160 20L172 10L160 0Z" fill="#00FF00"/>
               </svg>
             </div>
-            <!-- Judul Surat Jalan -->
             <div>
               <h2 class="text-base font-bold tracking-wider uppercase text-gray-900 pr-2">SURAT JALAN</h2>
             </div>
           </div>
+        `;
+      }
 
-          <!-- META INFORMASI (Dua Kolom Rapi) -->
+      return `
+        <div class="border border-gray-500 p-4 font-sans relative text-xs bg-white">
+          ${headerKopHTML}
+
+          <!-- META INFORMASI -->
           <div class="grid grid-cols-12 gap-2 mb-3">
             <div class="col-span-7 space-y-0.5">
               <div class="flex"><span class="w-16 font-bold">Kepada</span><span class="mr-1">:</span><span class="flex-1">${kepada}</span></div>
