@@ -26,12 +26,12 @@
     
     <!-- SECTION UPLOAD KOP SURAT -->
     <div class="bg-amber-50 p-3 rounded-lg border border-amber-200 mb-4">
-      <label class="block text-xs font-bold text-amber-800 mb-1">🖼️ Upload Kop Surat (JPG / PNG)</label>
+      <label class="block text-xs font-bold text-amber-800 mb-1">🖼️ Upload Kop Surat Full Width (JPG / PNG)</label>
       <div class="flex items-center gap-3">
         <input type="file" id="input-kop" accept="image/jpeg, image/png, image/jpg" onchange="handleKopUpload(event)" class="text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-700 cursor-pointer">
         <button type="button" onclick="removeKop()" id="btn-remove-kop" class="hidden text-xs text-red-600 hover:underline">Hapus Kop Gambar</button>
       </div>
-      <p class="text-[10px] text-amber-700 mt-1">*Gambar Kop Surat akan otomatis terpasang di bagian atas Surat Jalan.</p>
+      <p class="text-[10px] text-amber-700 mt-1">*Gambar Kop akan membentang penuh dari kiri ke kanan di bagian paling atas.</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -112,7 +112,7 @@
     </div>
   </div>
 
-  <!-- HASIL CETAK SURAT JALAN (2 SALINAN PRESISI A4) -->
+  <!-- HASIL CETAK SURAT JALAN (2 SALINAN PRESISI) -->
   <div class="max-w-[195mm] mx-auto bg-white space-y-4">
     <div id="surat-copy-1"></div>
     <div class="border-b border-dashed border-gray-300 my-2 no-print"></div>
@@ -123,7 +123,7 @@
     const SUPABASE_URL = "https://gdultxxabcjtnaxprvat.supabase.co";
     const SUPABASE_KEY = "sb_publishable_LGTFrw06VV9He2Wddj9OaA_LxpTBsic";
     let supabaseClient = null;
-    let customKopImage = null; // Menyimpan data gambar Kop Surat (Base64)
+    let customKopImage = null;
 
     if (window.supabase) {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -138,7 +138,6 @@
 
     document.getElementById('input-tanggal').value = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     
-    // Function Handler Upload Gambar Kop Surat
     function handleKopUpload(event) {
       const file = event.target.files[0];
       if (file) {
@@ -261,38 +260,32 @@
         </tr>
       `).join('');
 
-      // Elemen Kop Surat (Dinamis: Pakai Gambar Upload atau SVG Default)
+      // Elemen Kop Surat Full Width (100% Dari Kiri ke Kanan)
       let headerKopHTML = '';
       if (customKopImage) {
         headerKopHTML = `
-          <div class="flex justify-between items-center mb-3 border-b pb-2">
-            <img src="${customKopImage}" class="max-h-16 max-w-[280px] object-contain" alt="Kop Surat">
-            <div>
-              <h2 class="text-base font-bold tracking-wider uppercase text-gray-900 pr-2">SURAT JALAN</h2>
-            </div>
+          <div class="w-full mb-3">
+            <img src="${customKopImage}" class="w-full h-auto max-h-24 object-contain" alt="Kop Surat">
           </div>
         `;
       } else {
         headerKopHTML = `
-          <div class="flex justify-between items-center mb-3 border-b pb-2">
-            <div class="flex items-center">
-              <svg width="200" height="20" viewBox="0 0 200 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 0H160L180 10L160 20H0V0Z" fill="#006400"/>
-                <path d="M160 0L180 10L160 20L172 10L160 0Z" fill="#00FF00"/>
-              </svg>
-            </div>
-            <div>
-              <h2 class="text-base font-bold tracking-wider uppercase text-gray-900 pr-2">SURAT JALAN</h2>
-            </div>
+          <div class="w-full mb-3">
+            <svg width="100%" height="24" viewBox="0 0 500 24" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 0H420L450 12L420 24H0V0Z" fill="#006400"/>
+              <path d="M420 0L450 12L420 24L440 12L420 0Z" fill="#00FF00"/>
+            </svg>
           </div>
         `;
       }
 
       return `
         <div class="border border-gray-500 p-4 font-sans relative text-xs bg-white">
+          
+          <!-- 1. KOP SURAT FULL WIDTH -->
           ${headerKopHTML}
 
-          <!-- META INFORMASI -->
+          <!-- 2. META INFORMASI (KEPADA & TANGGAL) -->
           <div class="grid grid-cols-12 gap-2 mb-3">
             <div class="col-span-7 space-y-0.5">
               <div class="flex"><span class="w-16 font-bold">Kepada</span><span class="mr-1">:</span><span class="flex-1">${kepada}</span></div>
@@ -306,7 +299,12 @@
             </div>
           </div>
 
-          <!-- TABEL BARANG -->
+          <!-- 3. TULISAN SURAT JALAN DI BAWAH GEDUNG / DENGAN GARIS BAWAH -->
+          <div class="text-center my-3 border-b pb-1">
+            <h2 class="text-base font-bold tracking-widest uppercase text-gray-900">SURAT JALAN</h2>
+          </div>
+
+          <!-- 4. TABEL BARANG -->
           <table class="w-full border-collapse border border-gray-400 mb-4 text-left">
             <thead>
               <tr class="bg-gray-100 border-b border-gray-400 text-xs">
@@ -321,7 +319,7 @@
             </tbody>
           </table>
 
-          <!-- TANDA TANGAN PENGIRIM & PENERIMA -->
+          <!-- 5. TANDA TANGAN PENGIRIM & PENERIMA -->
           <div class="flex justify-between text-center mt-6 px-12">
             <div>
               <div class="font-medium">Pengirim</div>
